@@ -1,7 +1,6 @@
 package com.tfg.servicio_etl.model.clinical;
 
 import lombok.*;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 

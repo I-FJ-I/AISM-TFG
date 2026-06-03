@@ -297,4 +297,7 @@ sketch
 .history
 .ionide
 
+### CSV files ###
+*.csv
+
 # End of https://www.toptal.com/developers/gitignore/api/java,react,visualstudiocode,macos,node,eclipse
