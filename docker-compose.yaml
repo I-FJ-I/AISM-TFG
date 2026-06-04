@@ -48,6 +48,25 @@ services:
     depends_on:
       - db-fhir
 
+  servicio-etl:
+    build: ./servicio-etl
+    ports:
+      - "8090:8090"
+    depends_on:
+      - db-omop
+
+  servicio-fhir:
+    build: ./servicio-fhir
+    ports:
+      - "8091:8090"
+    depends_on:
+      - db-fhir
+
+  cliente-web:
+    build: ./cliente-web
+    ports:
+      - "80:80"
+
 volumes:
   postgres_data:
   mongo_data:
