@@ -1,0 +1,213 @@
+/* ---------- 1. PALETA DE COLORES ---------- */
+:root {
+    --color-blanco:        #FFFFFF;
+    --color-fondo:         #F8F7F5;   /* blanco cálido, casi hueso */
+    --color-superficie:    #EFEDE9;   /* gris arena muy suave */
+    --color-borde:         #E2DED8;   /* separadores discretos */
+
+    --color-texto:         #2C2C2C;   /* gris carbón, no negro puro */
+    --color-texto-suave:   #7A7570;   /* texto secundario */
+
+    --color-acento:        #B8A99A;   /* marrón tostado apagado */
+    --color-acento-hover:  #A39080;   /* versión algo más oscura para hover */
+
+    --color-exito:         #A8C5A0;   /* verde salvia */
+    --color-info:          #A0B8C5;   /* azul niebla */
+    --color-alerta:        #C5B8A0;   /* ocre tenue */
+
+    --sombra-suave: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --sombra-card:  0 4px 14px rgba(0, 0, 0, 0.08);
+    --radio:        0.6rem;
+}
+
+/* ---------- 2. RESET / LAYOUT GENERAL ---------- */
+html, body, #root {
+    height: 100%;
+}
+
+body {
+    background-color: var(--color-fondo);
+    color: var(--color-texto);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.55;
+}
+
+#root {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* Tipografía de cabeceras */
+h1, h2, h3 {
+    font-variant: small-caps;
+    font-family: Georgia, 'Times New Roman', serif;
+    letter-spacing: 0.5px;
+}
+
+a {
+    color: var(--color-acento-hover);
+    text-decoration: none;
+}
+a:hover {
+    color: var(--color-texto);
+    text-decoration: underline;
+}
+
+/* ---------- 3. MEDIA QUERIES (Responsive Web Design) ---------- */
+@media (max-width: 992px) {
+    .grid-detalle {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .grid-productos {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 16px;
+    }
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.35rem; }
+}
+
+@media (max-width: 480px) {
+    .grid-productos {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    .navbar-brand { font-size: 1.05rem; }
+    .table { font-size: 0.9rem; }
+}
+
+/* Modo impresión opcional */
+@media print {
+    .navbar, footer, .btn { display: none !important; }
+    body { background: #fff; color: #000; }
+}
+
+/* ---------- 4. APLICACIÓN DE LA PALETA A BOOTSTRAP ---------- */
+
+/* Botones primarios */
+.btn-primary {
+    background-color: var(--color-acento);
+    border-color: var(--color-acento);
+    color: var(--color-blanco);
+}
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    background-color: var(--color-acento-hover);
+    border-color: var(--color-acento-hover);
+    color: var(--color-blanco);
+}
+
+.bg-primary {
+    background-color: var(--color-acento) !important;
+}
+.text-primary {
+    color: var(--color-acento-hover) !important;
+}
+
+/* Outline secundario suave */
+.btn-outline-secondary {
+    border-color: var(--color-borde);
+    color: var(--color-texto-suave);
+}
+.btn-outline-secondary:hover {
+    background-color: var(--color-superficie);
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+}
+
+.btn-outline-primary {
+    border-color: var(--color-acento);
+    color: var(--color-acento-hover);
+}
+.btn-outline-primary:hover {
+    background-color: var(--color-acento);
+    color: var(--color-blanco);
+}
+
+/* Cards */
+.card {
+    background-color: var(--color-blanco);
+    border-color: var(--color-borde);
+    border-radius: var(--radio);
+    box-shadow: var(--sombra-suave);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-card);
+}
+
+.card-footer.bg-light {
+    background-color: var(--color-superficie) !important;
+    border-color: var(--color-borde);
+    color: var(--color-texto-suave);
+}
+
+/* Inputs */
+.form-control,
+.form-select {
+    background-color: var(--color-blanco);
+    border-color: var(--color-borde);
+    color: var(--color-texto);
+}
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--color-acento);
+    box-shadow: 0 0 0 0.2rem rgba(184, 169, 154, 0.25);
+}
+
+/* Badges */
+.badge.bg-success { background-color: var(--color-exito) !important; color: var(--color-texto); }
+.badge.bg-info    { background-color: var(--color-info)   !important; color: var(--color-texto); }
+
+/* Tablas */
+.table {
+    --bs-table-striped-bg: var(--color-superficie);
+    --bs-table-hover-bg:   var(--color-borde);
+    border-color: var(--color-borde);
+}
+
+/* Paginación */
+.pagination .page-link {
+    color: var(--color-texto);
+    border-color: var(--color-borde);
+}
+.pagination .page-item.active .page-link {
+    background-color: var(--color-acento);
+    border-color: var(--color-acento);
+    color: var(--color-blanco);
+}
+
+/* Navegación */
+.nav-link.active {
+    font-weight: 600;
+    color: var(--color-blanco) !important;
+}
+
+/* Alertas */
+.alert-warning {
+    background-color: var(--color-alerta);
+    border-color: var(--color-acento);
+    color: var(--color-texto);
+}
+.alert-success {
+    background-color: var(--color-exito);
+    border-color: var(--color-acento-hover);
+    color: var(--color-texto);
+}
+.alert-info {
+    background-color: var(--color-info);
+    border-color: var(--color-acento-hover);
+    color: var(--color-texto);
+}
+
+/* Pequeños detalles utilitarios */
+.small-caps { font-variant: small-caps; }
