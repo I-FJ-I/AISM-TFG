@@ -300,4 +300,6 @@ sketch
 ### CSV files ###
 *.csv
 
+target/
+
 # End of https://www.toptal.com/developers/gitignore/api/java,react,visualstudiocode,macos,node,eclipse
