@@ -3,6 +3,7 @@ package com.tfg.servicio_etl.configurations;
 import java.time.LocalDate;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,8 +22,10 @@ public class CdmProperties {
 
     private String cdmEtlReference;
 
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate sourceReleaseDate;
 
+	@DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate cdmReleaseDate;
 
     /** CDM version identifier (e.g., 'v5.4'). */
