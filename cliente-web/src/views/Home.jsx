@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import PatientList from '../components/PatientList.jsx';
 
 const Home = () => {
 
@@ -14,6 +15,10 @@ const Home = () => {
           {'Bienvenido al cliente web del TFG-AISM'}
         </h1>
       </header>
+
+      <section>
+        <PatientList />
+      </section>
     </main>
   );
 };

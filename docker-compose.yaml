@@ -66,6 +66,9 @@ services:
     build: ./cliente-web
     ports:
       - "80:80"
+    depends_on:
+      - servicio-fhir
+      - servicio-etl
       
   servicio-traductor:
     build: 

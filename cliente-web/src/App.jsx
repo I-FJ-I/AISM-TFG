@@ -5,6 +5,8 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 
 import Home from './views/Home';
+import SearchPatients from './views/SearchPatients';
+import PatientDetail from './views/PatientDetail';
 import NotFound from './views/NotFound';
 
 function App() {
@@ -15,6 +17,8 @@ function App() {
             <Routes>
 
             <Route path="/" element={<Home />} />
+            <Route path="/search" element={<SearchPatients />} />
+            <Route path="/patient/:id" element={<PatientDetail />} />
             
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

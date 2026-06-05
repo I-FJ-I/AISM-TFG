@@ -1,10 +1,18 @@
 package com.tfg.servicio_fhir.client;
 
+import java.util.List;
+import java.util.Map;
+
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
 import com.tfg.servicio_fhir.repositories.*;
+
+import ca.uhn.fhir.context.FhirContext;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tfg.servicio_fhir.documents.*;
 
 /**
@@ -25,13 +33,15 @@ public class MongoFhirResourcePersister implements FhirResourcePersister {
     private final ProcedureRepository         procedureRepository;
     private final DeviceRepository            deviceRepository;
     private final SpecimenRepository          specimenRepository;
+    
+    private final FhirContext				  fhirContext;
 
     
     
     public MongoFhirResourcePersister(PatientRepository patientRepository, EncounterRepository encounterRepository,
 			ConditionRepository conditionRepository, MedicationRequestRepository medicationRequestRepository,
 			ObservationRepository observationRepository, ProcedureRepository procedureRepository,
-			DeviceRepository deviceRepository, SpecimenRepository specimenRepository) {
+			DeviceRepository deviceRepository, SpecimenRepository specimenRepository, FhirContext fhirContext) {
 		super();
 		this.patientRepository = patientRepository;
 		this.encounterRepository = encounterRepository;
@@ -41,6 +51,7 @@ public class MongoFhirResourcePersister implements FhirResourcePersister {
 		this.procedureRepository = procedureRepository;
 		this.deviceRepository = deviceRepository;
 		this.specimenRepository = specimenRepository;
+		this.fhirContext = fhirContext;
 	}
 
     /**
@@ -79,6 +90,7 @@ public class MongoFhirResourcePersister implements FhirResourcePersister {
     	doc.setActive(patient.hasActive() ? patient.getActive() : null);
     	doc.setDeceasedDateTime(patient.hasDeceasedDateTimeType()
                         ? patient.getDeceasedDateTimeType().getValueAsString() : null);
+    	doc.setIdentifier(convertIdentifiersToMap(patient.getIdentifier()));
         patientRepository.save(doc);
     }
 
@@ -217,5 +229,26 @@ public class MongoFhirResourcePersister implements FhirResourcePersister {
             doc.setReceivedTime(specimen.getReceivedTimeElement().getValueAsString());
         }
         specimenRepository.save(doc);
+    }
+    
+    // ── UTILS ──────────────────────────────────────────────────────────────
+    
+    public List<Map<String, Object>> convertIdentifiersToMap(List<Identifier> identifiers) {
+        try {
+            String json = fhirContext.newJsonParser().encodeResourceToString(
+                new Bundle().addEntry(new Bundle.BundleEntryComponent().setResource(new Patient().setIdentifier(identifiers)))
+            );
+
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> bundleMap = mapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+            
+            List<Map<String, Object>> entries = (List<Map<String, Object>>) bundleMap.get("entry");
+            Map<String, Object> firstEntry = entries.get(0);
+            Map<String, Object> resource = (Map<String, Object>) firstEntry.get("resource");
+            
+            return (List<Map<String, Object>>) resource.get("identifier");
+        } catch (Exception e) {
+            throw new RuntimeException("Error converting identifiers to map", e);
+        }
     }
 }

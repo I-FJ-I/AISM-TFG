@@ -43,7 +43,7 @@ def translate_person_to_fhir(person: PersonOMOP) -> dict:
         "active": True, # FHIR permite indicar si el registro está activo
         "identifier": [
             {
-                "system": "http://tu-hospital.com/ids",
+                "system": "http://TFG/AISM",
                 "value": person.person_source_value
             }
         ]

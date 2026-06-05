@@ -1,8 +1,12 @@
 import React from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
-  const navigate = useNavigate();
+  
+  const handleExport = () => {
+    alert("Exportando datos...");
+    window.location.href = '/omop/etl/export';
+  };
 
   return (
     <nav
@@ -14,17 +18,31 @@ const Navbar = () => {
           <span style={{ fontVariant: 'small-caps' }}>AISM</span>
         </Link>
 
+        <Link className="navbar-brand fw-bold" to="/search">
+          <span style={{ fontVariant: 'small-caps' }}>Buscar Pacientes</span>
+        </Link>
+
         <button
           className="navbar-toggler"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Mostrar navegación"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
+
+        <div className="collapse navbar-collapse" id="navbarNav">
+          <ul className="navbar-nav ms-auto">
+            <li className="nav-item">
+              <button 
+                onClick={handleExport}
+                className="btn btn-outline-light btn-sm mt-2 mt-lg-0"
+              >
+                <i className="bi bi-download me-1"></i> Exportar Datos
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
   );
