@@ -15,7 +15,7 @@ import com.tfg.servicio_fhir.documents.*;
  * locally so that future requests can find it directly in MongoDB.
  */
 @Component
-public class MongoFhirResourcePersister {
+public class MongoFhirResourcePersister implements FhirResourcePersister {
 
     private final PatientRepository           patientRepository;
     private final EncounterRepository         encounterRepository;

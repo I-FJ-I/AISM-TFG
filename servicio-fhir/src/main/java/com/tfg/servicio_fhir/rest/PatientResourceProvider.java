@@ -16,6 +16,8 @@ import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.tfg.servicio_fhir.client.ExternalClient;
+import com.tfg.servicio_fhir.client.FhirResourcePersister;
 import com.tfg.servicio_fhir.documents.PatientDocument;
 import com.tfg.servicio_fhir.repositories.PatientRepository;
 
@@ -41,12 +43,17 @@ public class PatientResourceProvider implements IResourceProvider {
     private final PatientRepository patientRepository;
     private final FhirContext fhirContext;
     private final ObjectMapper objectMapper;
+    private final ExternalClient externalClient;
+    private final FhirResourcePersister persister;
     
     @Autowired
-    public PatientResourceProvider(PatientRepository patientRepository, FhirContext fhirContext, ObjectMapper objectMapper) {
+    public PatientResourceProvider(PatientRepository patientRepository, FhirContext fhirContext, ObjectMapper objectMapper, 
+    		ExternalClient externalClient, FhirResourcePersister persister) {
 		this.patientRepository = patientRepository;
 		this.fhirContext = fhirContext;
 		this.objectMapper = objectMapper;
+		this.externalClient = externalClient;
+		this.persister = persister;
 	}
 
     @Override
@@ -58,10 +65,24 @@ public class PatientResourceProvider implements IResourceProvider {
 
     @Read
     public Patient read(@IdParam IdType id) {
-        PatientDocument doc = patientRepository.findById(id.getIdPart())
-                .orElseThrow(() -> new ResourceNotFoundException(id));
-
-        return toFhir(doc);
+        return patientRepository.findById(id.getIdPart())
+                .map(this::toFhir)
+                
+                .orElseGet(() -> {
+                    Patient externalResource = externalClient.fetchResource("Patient", id.getIdPart(), Patient.class)
+                            .map(Patient.class::cast)
+                            .orElseThrow(() -> new ResourceNotFoundException(id));
+                    
+                    System.out.println(externalResource);
+                    
+                    try {
+                        persister.persist(externalResource);
+                    } catch (Exception e) {
+                        e.printStackTrace(); 
+                    }
+                    
+                    return externalResource;
+                });
     }
 
     // ── SEARCH ───────────────────────────────────────────────────────────────

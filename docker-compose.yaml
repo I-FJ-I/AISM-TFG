@@ -51,14 +51,14 @@ services:
   servicio-etl:
     build: ./servicio-etl
     ports:
-      - "8090:8090"
+      - "8090:8080"
     depends_on:
       - db-omop
 
   servicio-fhir:
     build: ./servicio-fhir
     ports:
-      - "8091:8090"
+      - "8091:8080"
     depends_on:
       - db-fhir
 
@@ -67,11 +67,11 @@ services:
     ports:
       - "80:80"
       
-  servicio_traductor:
+  servicio-traductor:
     build: 
       context: ./servicio-traductor
       dockerfile: Dockerfile
-    container_name: servicio_traductor
+    container_name: servicio-traductor
     ports:
       - "8084:8080"
     environment:
