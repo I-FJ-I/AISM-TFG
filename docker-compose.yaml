@@ -48,33 +48,34 @@ services:
     depends_on:
       - db-fhir
 
-  servicio-etl:
-    build: ./servicio-etl
+  etl-service:
+    build: ./etl-service
+    container_name: etl-service
     ports:
       - "8090:8080"
     depends_on:
       - db-omop
 
-  servicio-fhir:
-    build: ./servicio-fhir
+  fhir-service:
+    build: ./fhir-service
+    container_name: fhir-service
     ports:
       - "8091:8080"
     depends_on:
       - db-fhir
 
-  cliente-web:
-    build: ./cliente-web
+  web-client:
+    build: ./web-client
+    container_name: web-client
     ports:
       - "80:80"
     depends_on:
       - servicio-fhir
       - servicio-etl
       
-  servicio-traductor:
-    build: 
-      context: ./servicio-traductor
-      dockerfile: Dockerfile
-    container_name: servicio-traductor
+  translator-service:
+    build: ./translator-service
+    container_name: translator-service
     ports:
       - "8084:8080"
     environment:
