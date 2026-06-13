@@ -1,5 +1,10 @@
 CREATE SCHEMA IF NOT EXISTS cdm_v54;
 
+CREATE SEQUENCE IF NOT EXISTS cdm_v54.person_seq START 1;
+CREATE SEQUENCE IF NOT EXISTS cdm_v54.condition_seq START 1;
+CREATE SEQUENCE IF NOT EXISTS cdm_v54.measurement_seq START 1;
+CREATE SEQUENCE IF NOT EXISTS cdm_v54.observation_seq START 1;
+
 --postgresql CDM DDL Specification for OMOP Common Data Model 5.4
 --HINT DISTRIBUTE ON KEY (person_id)
 CREATE TABLE cdm_v54.person (
