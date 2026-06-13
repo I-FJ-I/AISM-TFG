@@ -9,33 +9,24 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.tfg.servicio_fhir.rest.auth.JwtAuthInterceptor;
+
 @Component
 public class FhirRestfulServer extends RestfulServer {
 
     private static final long serialVersionUID = 1L;
 
     private final PatientResourceProvider           patientProvider;
-    private final EncounterResourceProvider         encounterProvider;
     private final ConditionResourceProvider         conditionProvider;
-    private final MedicationRequestResourceProvider medicationRequestProvider;
     private final ObservationResourceProvider       observationProvider;
-    private final ProcedureResourceProvider         procedureProvider;
-    private final DeviceResourceProvider            deviceProvider;
-    private final SpecimenResourceProvider          specimenProvider;
     private final FhirContext 						fhirContext;
 
     @Autowired
-    public FhirRestfulServer(PatientResourceProvider patientProvider, EncounterResourceProvider encounterProvider, ConditionResourceProvider conditionProvider,
-    		MedicationRequestResourceProvider medicationRequestProvider, ObservationResourceProvider observationProvider, ProcedureResourceProvider procedureProvider, 
-    		DeviceResourceProvider deviceProvider, SpecimenResourceProvider specimenProvider, FhirContext fhirContext) {
+    public FhirRestfulServer(PatientResourceProvider patientProvider, ConditionResourceProvider conditionProvider,
+    		ObservationResourceProvider observationProvider, FhirContext fhirContext) {
 		this.patientProvider = patientProvider;
-		this.encounterProvider = encounterProvider;
 		this.conditionProvider = conditionProvider;
-		this.medicationRequestProvider = medicationRequestProvider;
 		this.observationProvider = observationProvider;
-		this.procedureProvider = procedureProvider;
-		this.deviceProvider = deviceProvider;
-		this.specimenProvider = specimenProvider;
 		this.fhirContext = fhirContext;
 	}
     
@@ -47,13 +38,11 @@ public class FhirRestfulServer extends RestfulServer {
         
         setResourceProviders(List.of(
                 patientProvider,
-                encounterProvider,
                 conditionProvider,
-                medicationRequestProvider,
-                observationProvider,
-                procedureProvider,
-                deviceProvider,
-                specimenProvider
+                observationProvider
         ));
+        
+        JwtAuthInterceptor authInterceptor = new JwtAuthInterceptor();
+        this.getInterceptorService().registerInterceptor(authInterceptor);
     }
 }

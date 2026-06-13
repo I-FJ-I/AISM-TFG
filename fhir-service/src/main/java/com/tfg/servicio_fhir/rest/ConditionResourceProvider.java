@@ -11,9 +11,12 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Component;
 
+import com.tfg.servicio_fhir.client.ExternalClient;
+import com.tfg.servicio_fhir.client.FhirResourcePersister;
 import com.tfg.servicio_fhir.documents.ConditionDocument;
 import com.tfg.servicio_fhir.repositories.ConditionRepository;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,12 +37,18 @@ import java.util.Map;
 @Component
 public class ConditionResourceProvider implements IResourceProvider {
 
-    private final ConditionRepository conditionRepository;
+	private final ConditionRepository conditionRepository;
+    private final ExternalClient externalClient;
+    private final FhirResourcePersister persister;
     
-    public ConditionResourceProvider(ConditionRepository conditionRepository) {
-    	this.conditionRepository = conditionRepository;
+    // Inyectamos el cliente y el persistor
+    public ConditionResourceProvider(ConditionRepository conditionRepository, 
+                                     ExternalClient externalClient, 
+                                     FhirResourcePersister persister) {
+        this.conditionRepository = conditionRepository;
+        this.externalClient = externalClient;
+        this.persister = persister;
     }
-
     @Override
     public Class<? extends IBaseResource> getResourceType() {
         return Condition.class;
@@ -68,9 +77,28 @@ public class ConditionResourceProvider implements IResourceProvider {
             @OptionalParam(name = Condition.SP_CODE)             TokenParam code,
             @OptionalParam(name = Condition.SP_CLINICAL_STATUS)  TokenParam clinicalStatus) {
 
-        if (patient != null) {
-            return conditionRepository.findByPatientReference("Patient/" + patient.getIdPart())
-                    .stream().map(this::toFhir).toList();
+    	if (patient != null) {
+            String patientId = patient.getIdPart();
+            
+            List<ConditionDocument> localDocs = conditionRepository.findByPatientReference("Patient/" + patientId);
+           
+            if (!localDocs.isEmpty()) {
+                return localDocs.stream().map(this::toFhir).toList();
+            }
+            String resourcePath = "Condition?patient_id=" + patientId;
+            
+            return externalClient.fetchResourceList(resourcePath, Condition.class)
+                    .map(externalConditions -> {
+                        for (Condition cond : externalConditions) {
+                            try {
+                                persister.persist(cond);
+                            } catch (Exception e) {
+                                e.printStackTrace(); 
+                            }
+                        }
+                        return externalConditions;
+                    })
+                    .orElseGet(Collections::emptyList);
         }
         if (encounter != null) {
             return conditionRepository.findByEncounterReference("Encounter/" + encounter.getIdPart())

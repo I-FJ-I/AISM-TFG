@@ -12,9 +12,12 @@ import org.hl7.fhir.r4.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.tfg.servicio_fhir.client.ExternalClient;
+import com.tfg.servicio_fhir.client.FhirResourcePersister;
 import com.tfg.servicio_fhir.documents.ObservationDocument;
 import com.tfg.servicio_fhir.repositories.ObservationRepository;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +42,17 @@ import java.util.Map;
 @Component
 public class ObservationResourceProvider implements IResourceProvider {
 
+	private final ExternalClient externalClient;
+	 private final FhirResourcePersister persister;
     private final ObservationRepository observationRepository;
     
     @Autowired
-    public ObservationResourceProvider(ObservationRepository observationRepository) {
+    public ObservationResourceProvider(ObservationRepository observationRepository,
+							    		ExternalClient externalClient, 
+							            FhirResourcePersister persister) {
     	this.observationRepository = observationRepository;
+    	this.externalClient = externalClient;
+    	this.persister = persister;
     }
 
     @Override
@@ -75,10 +84,28 @@ public class ObservationResourceProvider implements IResourceProvider {
             @OptionalParam(name = Observation.SP_CATEGORY)  TokenParam category,
             @OptionalParam(name = Observation.SP_STATUS)    TokenParam status) {
 
-        if (patient != null) {
-            return observationRepository
-                    .findByPatientReference("Patient/" + patient.getIdPart())
-                    .stream().map(this::toFhir).toList();
+    	if (patient != null) {
+            String patientId = patient.getIdPart();
+            
+            List<ObservationDocument> localDocs = observationRepository.findByPatientReference("Patient/" + patientId);
+           
+            if (!localDocs.isEmpty()) {
+                return localDocs.stream().map(this::toFhir).toList();
+            }
+            String resourcePath = "Observation?patient_id=" + patientId;
+            
+            return externalClient.fetchResourceList(resourcePath, Observation.class)
+                    .map(externalObservations -> {
+                        for (Observation ob : externalObservations) {
+                            try {
+                                persister.persist(ob);
+                            } catch (Exception e) {
+                                e.printStackTrace(); 
+                            }
+                        }
+                        return externalObservations;
+                    })
+                    .orElseGet(Collections::emptyList);
         }
         if (encounter != null) {
             return observationRepository
@@ -172,7 +199,11 @@ public class ObservationResourceProvider implements IResourceProvider {
         }
         if (doc.getValueQuantity() != null) {
             Quantity q = new Quantity();
-            q.setValue(((Number) doc.getValueQuantity().getOrDefault("value", 0)).doubleValue());
+            Object valueObj = doc.getValueQuantity().get("value");
+            if (valueObj != null) {
+                q.setValue(new java.math.BigDecimal(valueObj.toString()));
+            }
+            // -----------------------
             q.setUnit((String) doc.getValueQuantity().get("unit"));
             q.setSystem((String) doc.getValueQuantity().get("system"));
             q.setCode((String) doc.getValueQuantity().get("code"));

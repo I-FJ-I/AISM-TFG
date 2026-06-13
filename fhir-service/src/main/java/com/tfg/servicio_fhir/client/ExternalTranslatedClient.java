@@ -1,8 +1,11 @@
 package com.tfg.servicio_fhir.client;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.Bundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -50,6 +53,37 @@ public class ExternalTranslatedClient implements ExternalClient {
             
         } catch (Exception e) {
             System.err.println("Connection error with FastAPI: " + e.getMessage());
+            return Optional.empty();
+        }
+
+        return Optional.empty();
+    }
+    
+    @Override
+    public <T extends IBaseResource> Optional<List<T>> fetchResourceList(String resourceType, Class<T> targetClass) {
+        String url = String.format("%s/%s", fastApiBaseUrl, resourceType);
+
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+
+            if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
+                IParser parser = fhirContext.newJsonParser();
+                
+                Bundle bundle = parser.parseResource(Bundle.class, response.getBody());
+                
+                List<T> resources = new ArrayList<>();
+                
+                for (Bundle.BundleEntryComponent entry : bundle.getEntry()) {
+                    if (entry.hasResource() && targetClass.isInstance(entry.getResource())) {
+                        resources.add(targetClass.cast(entry.getResource()));
+                    }
+                }
+                
+                return Optional.of(resources);
+            }
+
+        } catch (Exception e) {
+            System.err.println("Connection error with FastAPI while fetching list: " + e.getMessage());
             return Optional.empty();
         }
 

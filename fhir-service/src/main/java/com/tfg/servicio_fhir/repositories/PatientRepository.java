@@ -1,6 +1,7 @@
 package com.tfg.servicio_fhir.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
@@ -11,8 +12,7 @@ import com.tfg.servicio_fhir.documents.PatientDocument;
 @Repository
 public interface PatientRepository extends MongoRepository<PatientDocument, String> {
 
-    @Query("{ 'identifier.value': ?0 }")
-    List<PatientDocument> findByIdentifierValue(String value);
+	Optional<PatientDocument> findById(String id);
 
     @Query("{ 'name.family': { $regex: ?0, $options: 'i' } }")
     List<PatientDocument> findByFamilyName(String familyName);
